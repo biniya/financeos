@@ -1,7 +1,18 @@
 import type { Category, Classification, CurrencyTotals, ItemCurrency } from '@/types'
 
 export function formatAmount(value: number, currency: ItemCurrency | string): string {
-  return `${currency} ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return `${currency} ${formatNumber(value)}`
+}
+
+export function formatNumber(value: number): string {
+  return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+export function parseFormattedNumber(raw: string): number {
+  const cleaned = raw.replace(/,/g, '').trim()
+  if (!cleaned) return 0
+  const n = parseFloat(cleaned)
+  return Number.isFinite(n) ? n : 0
 }
 
 export function formatDate(iso: string): string {

@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 import type { Classification } from '@/types'
-import { totalsForCategories } from '@/utils/format'
+import { formatNumber, totalsForCategories } from '@/utils/format'
+import { hexToRgba } from '@/utils/color'
 import CategoryCard from './CategoryCard.vue'
+import { PlusIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps<{
   classification: Classification
@@ -19,7 +22,13 @@ const emit = defineEmits<{
   dropCategory: [categoryId: string, fromClassificationId: string]
 }>()
 
+const editingName = ref(false)
+const showAddMenu = ref(false)
+const addMenuRef = ref<HTMLElement>()
 const columnTotals = computed(() => totalsForCategories(props.classification.categories))
+const tintBg = computed(() => hexToRgba(props.classification.color, 0.12))
+
+onClickOutside(addMenuRef, () => { showAddMenu.value = false })
 
 function onDrop(e: DragEvent) {
   const raw = e.dataTransfer?.getData('application/json')
@@ -30,78 +39,113 @@ function onDrop(e: DragEvent) {
 </script>
 
 <template>
-  <div class="flex flex-col items-center">
-    <div class="group relative w-full max-w-[152px] overflow-hidden rounded-xl bg-white shadow-md shadow-slate-200/60 ring-1 ring-slate-200/80">
-      <div class="h-1" :style="{ backgroundColor: classification.color }" />
-
-      <div class="px-3 py-3">
-        <div class="flex items-center gap-1.5">
-          <input
-            v-if="editorVisible"
-            type="color"
-            :value="classification.color"
-            class="h-3 w-3 shrink-0 cursor-pointer rounded-full border-0 p-0"
-            @input="emit('update', { color: ($event.target as HTMLInputElement).value })"
-          />
-          <span v-else class="h-2 w-2 shrink-0 rounded-full" :style="{ backgroundColor: classification.color }" />
-
-          <input
-            v-if="editorVisible"
-            :value="classification.name"
-            class="min-w-0 flex-1 bg-transparent text-xs font-medium text-slate-800 outline-none"
-            @input="emit('update', { name: ($event.target as HTMLInputElement).value })"
-          />
-          <span v-else class="text-xs font-medium text-slate-800">{{ classification.name }}</span>
-        </div>
-
-        <div class="mt-2 space-y-0.5 text-[11px] tabular-nums text-slate-500">
-          <p><span class="text-teal-600">Br</span> {{ columnTotals.Br.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</p>
-          <p v-if="columnTotals.USD > 0 || editorVisible">
-            <span class="text-sky-600">USD</span> {{ columnTotals.USD.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
-          </p>
-        </div>
-      </div>
+  <div class="flex w-[208px] flex-col items-stretch">
+    <!-- Classification header -->
+    <div
+      class="group relative overflow-hidden rounded-2xl px-4 py-4 shadow-md ring-1 ring-black/[0.06]"
+      :style="{
+        backgroundColor: tintBg,
+        boxShadow: `0 8px 28px -8px ${hexToRgba(classification.color, 0.35)}`,
+      }"
+    >
+      <div class="absolute inset-x-0 top-0 h-1.5" :style="{ backgroundColor: classification.color }" />
 
       <button
         v-if="editorVisible"
-        class="absolute right-1.5 top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500 group-hover:flex hover:bg-red-500 hover:text-white"
+        class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-elevated/90 text-xs text-muted opacity-0 shadow-sm transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-600"
         @click="emit('remove')"
       >
         ×
       </button>
+
+      <div class="flex items-center gap-2.5">
+        <input
+          v-if="editorVisible"
+          type="color"
+          :value="classification.color"
+          class="h-4 w-4 shrink-0 cursor-pointer rounded-full border-2 border-white shadow-sm"
+          @input="emit('update', { color: ($event.target as HTMLInputElement).value })"
+        />
+        <span
+          v-else
+          class="h-3 w-3 shrink-0 rounded-full shadow-sm ring-2 ring-white"
+          :style="{ backgroundColor: classification.color }"
+        />
+
+        <input
+          v-if="editorVisible && editingName"
+          :value="classification.name"
+          class="min-w-0 flex-1 bg-transparent font-display text-sm font-semibold text-ink outline-none"
+          autofocus
+          @blur="editingName = false"
+          @keydown.enter="editingName = false"
+          @input="emit('update', { name: ($event.target as HTMLInputElement).value })"
+        />
+        <button
+          v-else
+          type="button"
+          class="min-w-0 flex-1 text-left font-display text-sm font-semibold text-ink"
+          :class="editorVisible ? 'cursor-text hover:text-brand' : ''"
+          @click="editorVisible && (editingName = true)"
+        >
+          {{ classification.name }}
+        </button>
+      </div>
+
+      <div class="mt-3 space-y-0.5">
+        <p class="font-mono-nums text-sm font-bold text-ink">
+          Br {{ formatNumber(columnTotals.Br) }}
+        </p>
+        <p
+          v-if="columnTotals.USD > 0 || editorVisible"
+          class="font-mono-nums text-xs font-medium text-muted"
+        >
+          USD {{ formatNumber(columnTotals.USD) }}
+        </p>
+      </div>
     </div>
 
-    <div class="my-2.5 h-5 w-px bg-slate-300/80" />
+    <div class="tree-drop mx-auto" />
 
-    <div
-      class="flex w-full max-w-[152px] flex-col gap-2"
-      @dragover.prevent
-      @drop="onDrop"
-    >
+    <!-- Line items -->
+    <div class="flex flex-col gap-2" @dragover.prevent @drop="onDrop">
       <CategoryCard
         v-for="cat in classification.categories"
         :key="cat.id"
         :category="cat"
         :classification-id="classification.id"
+        :classification-color="classification.color"
         :editor-visible="editorVisible"
         @update="emit('updateCategory', cat.id, $event)"
         @remove="emit('removeCategory', cat.id)"
       />
 
-      <template v-if="editorVisible">
+      <div v-if="editorVisible" ref="addMenuRef" class="relative">
         <button
-          class="rounded-lg py-2 text-[11px] font-medium text-slate-400 ring-1 ring-dashed ring-slate-300 transition hover:text-teal-600 hover:ring-teal-400"
-          @click="emit('addCategory')"
+          class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line py-2.5 text-xs font-semibold text-muted transition hover:border-brand/40 hover:bg-brand/5 hover:text-brand"
+          @click="showAddMenu = !showAddMenu"
         >
-          + Br category
+          <PlusIcon class="h-3.5 w-3.5" />
+          Add item
         </button>
-        <button
-          class="rounded-lg py-2 text-[11px] font-medium text-slate-400 ring-1 ring-dashed ring-slate-300 transition hover:text-sky-600 hover:ring-sky-400"
-          @click="emit('addCategoryUsd')"
+        <div
+          v-if="showAddMenu"
+          class="absolute left-0 right-0 top-full z-10 mt-1 overflow-hidden rounded-xl border border-line bg-elevated py-1 shadow-lg"
         >
-          + USD category
-        </button>
-      </template>
+          <button
+            class="w-full px-3 py-2 text-left text-xs font-medium text-ink hover:bg-surface"
+            @click="emit('addCategory'); showAddMenu = false"
+          >
+            Birr line item
+          </button>
+          <button
+            class="w-full px-3 py-2 text-left text-xs font-medium text-ink hover:bg-surface"
+            @click="emit('addCategoryUsd'); showAddMenu = false"
+          >
+            USD line item
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>

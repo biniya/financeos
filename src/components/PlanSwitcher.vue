@@ -10,6 +10,7 @@ import {
   TrashIcon,
   CloudIcon,
   ArrowRightOnRectangleIcon,
+  CheckIcon,
 } from '@heroicons/vue/24/outline'
 
 const auth = useAuthStore()
@@ -61,59 +62,58 @@ async function signOut() {
   <div ref="rootRef" class="no-print flex items-center gap-2">
     <span
       v-if="store.isCloud"
-      class="hidden items-center gap-1 text-[10px] text-slate-400 sm:flex"
+      class="hidden items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-white/70 ring-1 ring-white/15 sm:flex"
       :title="store.syncError ?? 'Synced to cloud'"
     >
-      <CloudIcon class="h-3.5 w-3.5" :class="store.syncing ? 'animate-pulse text-sky-500' : ''" />
-      {{ store.syncing ? 'Syncing…' : store.syncError ? 'Sync error' : 'Cloud' }}
+      <CloudIcon class="h-3 w-3" :class="store.syncing ? 'animate-pulse' : ''" />
+      {{ store.syncing ? 'Syncing' : store.syncError ? 'Error' : 'Saved' }}
     </span>
 
     <div class="relative">
       <button
-        class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+        class="flex items-center gap-2 rounded-[10px] bg-white/10 px-3 py-2 text-xs font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15"
         @click="open = !open"
       >
-        <span class="max-w-[120px] truncate">{{ displayLabel }}</span>
-        <ChevronDownIcon class="h-3.5 w-3.5 text-slate-400" />
+        <span class="max-w-[100px] truncate">{{ displayLabel }}</span>
+        <ChevronDownIcon class="h-3.5 w-3.5 text-white/60" />
       </button>
 
       <div
         v-if="open"
-        class="absolute left-0 top-full z-50 mt-1 w-64 rounded-xl border border-slate-200 bg-white py-1 shadow-xl"
+        class="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-line bg-elevated py-1 shadow-xl"
       >
-        <p class="px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-slate-400">Saved plans</p>
+        <p class="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted">Your plans</p>
         <button
           v-for="plan in store.state.plans"
           :key="plan.id"
-          class="flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-slate-50"
-          :class="plan.id === store.activePlan?.id ? 'bg-slate-100 text-slate-900' : 'text-slate-700'"
+          class="flex w-full items-center justify-between px-4 py-2.5 text-left transition hover:bg-surface"
+          :class="plan.id === store.activePlan?.id ? 'bg-accent-soft/50' : ''"
           @click="selectPlan(plan.id)"
         >
           <div class="min-w-0">
-            <p class="truncate font-medium">{{ plan.data.name.trim() || plan.label }}</p>
-            <p class="text-[10px] text-slate-400">Updated {{ formatDate(plan.updatedAt) }}</p>
+            <p class="truncate text-sm font-semibold text-ink">{{ plan.data.name.trim() || plan.label }}</p>
+            <p class="text-[10px] text-muted">{{ formatDate(plan.updatedAt) }}</p>
           </div>
           <button
             v-if="store.state.plans.length > 1"
-            class="ml-2 shrink-0 rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500"
-            title="Delete plan"
+            class="ml-2 shrink-0 rounded-lg p-1.5 text-muted hover:bg-red-50 hover:text-red-600"
             @click="deletePlan(plan.id, $event)"
           >
             <TrashIcon class="h-3.5 w-3.5" />
           </button>
         </button>
 
-        <div class="border-t border-slate-100 p-1">
+        <div class="border-t border-line p-1">
           <button
-            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+            class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink hover:bg-surface"
             @click="newPlan"
           >
-            <PlusIcon class="h-4 w-4" />
+            <PlusIcon class="h-4 w-4 text-brand" />
             New plan
           </button>
           <button
             v-if="auth.isAuthenticated"
-            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-500 transition hover:bg-slate-50"
+            class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted hover:bg-surface"
             @click="signOut"
           >
             <ArrowRightOnRectangleIcon class="h-4 w-4" />
@@ -124,11 +124,14 @@ async function signOut() {
     </div>
 
     <button
-      class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium transition"
-      :class="savedFlash ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50'"
+      class="flex items-center gap-1.5 rounded-[10px] px-3 py-2 text-xs font-semibold transition ring-1"
+      :class="savedFlash
+        ? 'bg-emerald-500/20 text-emerald-100 ring-emerald-400/30'
+        : 'bg-white/10 text-white ring-white/15 hover:bg-white/15'"
       @click="save"
     >
-      {{ savedFlash ? 'Saved ✓' : 'Save' }}
+      <CheckIcon v-if="savedFlash" class="h-3.5 w-3.5" />
+      {{ savedFlash ? 'Saved' : 'Save' }}
     </button>
 
     <slot />
