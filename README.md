@@ -18,9 +18,11 @@ Expense classification tree with **cloud sync** via Supabase and hosting on Verc
 1. Create a free project at [supabase.com](https://supabase.com)
 2. Open **SQL Editor** and run the contents of [`supabase/schema.sql`](./supabase/schema.sql)
 3. Go to **Project Settings → API** and copy:
-   - **Project URL**
+   - **Project URL** (no `/rest/v1/` suffix)
    - **anon public** key
-4. (Optional) Under **Authentication → Providers → Email**, disable **Confirm email** for faster local testing
+4. **Authentication → Users → Add user** — create your account (enable **Auto Confirm User**)
+5. **Authentication → Providers → Email** — disable **Confirm email** and **Allow new users to sign up**
+6. **Authentication → URL Configuration** — set **Site URL** to your Vercel URL and add it under **Redirect URLs**
 
 ---
 
@@ -56,7 +58,7 @@ Without `.env.local`, the app runs in **local-only mode** (data stays in the bro
 | Layer | Role |
 |-------|------|
 | **Vercel** | Hosts the Vue frontend |
-| **Supabase Auth** | Sign up / sign in |
+| **Supabase Auth** | Sign in only (users created in Supabase dashboard) |
 | **Supabase `plans` table** | Stores each financial plan (JSON) |
 | **Supabase `user_settings`** | Active plan + USD exchange rate |
 

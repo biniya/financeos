@@ -4,7 +4,6 @@ import { useAuthStore } from '@/stores/auth'
 import { isSupabaseConfigured } from '@/lib/supabase'
 
 const auth = useAuthStore()
-const mode = ref<'signin' | 'signup'>('signin')
 const email = ref('')
 const password = ref('')
 const submitting = ref(false)
@@ -13,12 +12,7 @@ async function submit() {
   if (!email.value || !password.value) return
   submitting.value = true
   try {
-    if (mode.value === 'signup') {
-      await auth.signUp(email.value, password.value)
-      if (!auth.authError) mode.value = 'signin'
-    } else {
-      await auth.signIn(email.value, password.value)
-    }
+    await auth.signIn(email.value, password.value)
   } catch {
     /* error shown via auth.authError */
   } finally {
@@ -36,30 +30,11 @@ async function submit() {
         </div>
         <h1 class="text-lg font-semibold">FinanceOS</h1>
         <p class="mt-1 text-xs text-white/50">
-          {{ isSupabaseConfigured ? 'Sign in to sync your plans to the cloud' : 'Cloud not configured' }}
+          {{ isSupabaseConfigured ? 'Sign in to access your plans' : 'Cloud not configured' }}
         </p>
       </div>
 
       <form v-if="isSupabaseConfigured" class="space-y-4 p-6" @submit.prevent="submit">
-        <div class="flex rounded-lg bg-slate-100 p-1">
-          <button
-            type="button"
-            class="flex-1 rounded-md py-1.5 text-xs font-medium transition"
-            :class="mode === 'signin' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'"
-            @click="mode = 'signin'"
-          >
-            Sign in
-          </button>
-          <button
-            type="button"
-            class="flex-1 rounded-md py-1.5 text-xs font-medium transition"
-            :class="mode === 'signup' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'"
-            @click="mode = 'signup'"
-          >
-            Sign up
-          </button>
-        </div>
-
         <label class="block">
           <span class="text-xs text-slate-500">Email</span>
           <input
@@ -90,7 +65,7 @@ async function submit() {
           :disabled="submitting"
           class="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
         >
-          {{ submitting ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account' }}
+          {{ submitting ? 'Please wait…' : 'Sign in' }}
         </button>
       </form>
 
