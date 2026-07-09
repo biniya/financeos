@@ -1,44 +1,44 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { usePlansStore } from '@/stores/classification'
+import { useTransactionsStore } from '@/stores/transactions'
 import { isSupabaseConfigured } from '@/lib/supabase'
+import AppShell from '@/components/layout/AppShell.vue'
 import AuthScreen from '@/components/AuthScreen.vue'
-import ClassificationTree from '@/components/ClassificationTree.vue'
 import BrandLogo from '@/components/brand/BrandLogo.vue'
 
 const auth = useAuthStore()
 const plans = usePlansStore()
+const transactions = useTransactionsStore()
+
+const loading = computed(() => auth.loading || !plans.ready || !transactions.ready)
 
 onMounted(async () => {
   await auth.init()
-  await plans.init()
+  await Promise.all([plans.init(), transactions.init()])
 })
 
 watch(
   () => auth.user?.id,
   async (userId, prevId) => {
     if (userId && userId !== prevId) {
-      await plans.onUserSignedIn(userId)
+      await Promise.all([plans.onUserSignedIn(userId), transactions.onUserSignedIn(userId)])
     } else if (!userId && prevId) {
       plans.onUserSignedOut()
+      transactions.onUserSignedOut()
     }
   },
 )
 </script>
 
 <template>
-  <div v-if="auth.loading || !plans.ready" class="flex min-h-screen flex-col items-center justify-center gap-4 bg-surface">
+  <div v-if="loading" class="flex min-h-screen flex-col items-center justify-center gap-4 bg-surface">
     <BrandLogo size="md" />
     <p class="text-sm text-muted">Loading your workspace…</p>
   </div>
 
   <AuthScreen v-else-if="isSupabaseConfigured && !auth.isAuthenticated" />
 
-  <ClassificationTree v-else-if="plans.activePlan" />
-
-  <div v-else class="flex min-h-screen flex-col items-center justify-center gap-4 bg-surface">
-    <BrandLogo size="md" />
-    <p class="text-sm text-muted">Loading plans…</p>
-  </div>
+  <AppShell v-else-if="plans.activePlan" />
 </template>

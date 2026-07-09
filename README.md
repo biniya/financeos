@@ -4,7 +4,8 @@ Expense classification tree with **cloud sync** via Supabase and hosting on Verc
 
 ## Features
 
-- Company financial plan tree (Br + USD)
+- **Plan** — company financial plan tree (Br + USD)
+- **Expenses** — import CSV transactions, cash-flow dashboard, searchable ledger
 - Multiple saved plans per account
 - Cloud sync with Supabase (auth + Postgres)
 - USD calculator with synced exchange rate
@@ -16,7 +17,9 @@ Expense classification tree with **cloud sync** via Supabase and hosting on Verc
 ## 1. Supabase setup (cloud database)
 
 1. Create a free project at [supabase.com](https://supabase.com)
-2. Open **SQL Editor** and run the contents of [`supabase/schema.sql`](./supabase/schema.sql)
+2. Open **SQL Editor** and run:
+   - [`supabase/schema.sql`](./supabase/schema.sql)
+   - [`supabase/transactions.sql`](./supabase/transactions.sql)
 3. Go to **Project Settings → API** and copy:
    - **Project URL** (no `/rest/v1/` suffix)
    - **anon public** key
@@ -60,6 +63,7 @@ Without `.env.local`, the app runs in **local-only mode** (data stays in the bro
 | **Vercel** | Hosts the Vue frontend |
 | **Supabase Auth** | Sign in only (users created in Supabase dashboard) |
 | **Supabase `plans` table** | Stores each financial plan (JSON) |
+| **Supabase `transactions` table** | Stores imported expense/income rows |
 | **Supabase `user_settings`** | Active plan + USD exchange rate |
 
 - Edits **auto-sync** to the cloud (debounced ~600ms)
@@ -68,6 +72,17 @@ Without `.env.local`, the app runs in **local-only mode** (data stays in the bro
 
 ---
 
+## 5. Expenses CSV import
+
+Go to **Expenses** in the app header and import a CSV with these columns:
+
+`Date, Account, Category, Classification, Type, Currency, Amount, Reporting, Description, Reference`
+
+- `ETB` is mapped to **Br**
+- Duplicate rows (same date, amount, description, type) are skipped on re-import
+
+---
+
 ## Tech stack
 
-Vue 3 · Pinia · Tailwind CSS · Supabase · Vercel
+Vue 3 · Pinia · Vue Router · ECharts · Tailwind CSS · Supabase · Vercel
