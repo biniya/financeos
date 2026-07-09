@@ -299,14 +299,14 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
   async function clearAll() {
     transactions.value = []
+    localStorage.removeItem(LOCAL_KEY)
     if (isCloud.value && auth.user) {
       try {
         await deleteAllTransactionsRemote(auth.user.id)
+        syncError.value = null
       } catch (e) {
         syncError.value = e instanceof Error ? e.message : 'Clear failed'
       }
-    } else {
-      persistLocal()
     }
   }
 
