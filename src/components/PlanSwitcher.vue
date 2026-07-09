@@ -59,28 +59,28 @@ async function signOut() {
 </script>
 
 <template>
-  <div ref="rootRef" class="no-print flex items-center gap-2">
+  <div ref="rootRef" class="no-print flex min-w-0 flex-wrap items-center justify-end gap-2">
     <span
       v-if="store.isCloud"
-      class="hidden items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-white/70 ring-1 ring-white/15 sm:flex"
+      class="flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-[10px] font-semibold text-white/70 ring-1 ring-white/15 sm:px-2.5"
       :title="store.syncError ?? 'Synced to cloud'"
     >
-      <CloudIcon class="h-3 w-3" :class="store.syncing ? 'animate-pulse' : ''" />
-      {{ store.syncing ? 'Syncing' : store.syncError ? 'Error' : 'Saved' }}
+      <CloudIcon class="h-3 w-3 shrink-0" :class="store.syncing ? 'animate-pulse' : ''" />
+      <span class="hidden sm:inline">{{ store.syncing ? 'Syncing' : store.syncError ? 'Error' : 'Saved' }}</span>
     </span>
 
-    <div class="relative">
+    <div class="relative min-w-0">
       <button
-        class="flex items-center gap-2 rounded-[10px] bg-white/10 px-3 py-2 text-xs font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+        class="flex max-w-full items-center gap-2 rounded-[10px] bg-white/10 px-3 py-2 text-xs font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15"
         @click="open = !open"
       >
-        <span class="max-w-[100px] truncate">{{ displayLabel }}</span>
-        <ChevronDownIcon class="h-3.5 w-3.5 text-white/60" />
+        <span class="max-w-[8rem] truncate sm:max-w-[12rem]">{{ displayLabel }}</span>
+        <ChevronDownIcon class="h-3.5 w-3.5 shrink-0 text-white/60" />
       </button>
 
       <div
         v-if="open"
-        class="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-line bg-elevated py-1 shadow-xl"
+        class="absolute right-0 top-full z-50 mt-2 w-[min(100vw-2rem,16rem)] overflow-hidden rounded-2xl border border-line bg-elevated py-1 shadow-xl"
       >
         <p class="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted">Your plans</p>
         <button

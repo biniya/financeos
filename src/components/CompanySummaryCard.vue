@@ -47,14 +47,14 @@ const combinedBr = computed(() => {
       </div>
 
       <!-- Currency breakdown -->
-      <div class="flex shrink-0 items-center gap-3">
-        <div class="rounded-xl bg-white/[0.07] px-4 py-2.5 ring-1 ring-white/10">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="min-w-[7rem] flex-1 rounded-xl bg-white/[0.07] px-4 py-2.5 ring-1 ring-white/10 sm:flex-none">
           <p class="text-[9px] font-semibold uppercase tracking-wider text-white/45">Birr</p>
-          <p class="mt-0.5 font-mono-nums text-sm font-semibold whitespace-nowrap">Br {{ formatNumber(totals.Br) }}</p>
+          <p class="mt-0.5 font-mono-nums text-sm font-semibold">Br {{ formatNumber(totals.Br) }}</p>
         </div>
-        <div class="rounded-xl bg-white/[0.07] px-4 py-2.5 ring-1 ring-white/10">
+        <div class="min-w-[7rem] flex-1 rounded-xl bg-white/[0.07] px-4 py-2.5 ring-1 ring-white/10 sm:flex-none">
           <p class="text-[9px] font-semibold uppercase tracking-wider text-white/45">USD</p>
-          <p class="mt-0.5 font-mono-nums text-sm font-semibold whitespace-nowrap">USD {{ formatNumber(totals.USD) }}</p>
+          <p class="mt-0.5 font-mono-nums text-sm font-semibold">USD {{ formatNumber(totals.USD) }}</p>
         </div>
       </div>
     </div>

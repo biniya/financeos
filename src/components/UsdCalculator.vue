@@ -20,17 +20,17 @@ function updateRate(value: number) {
 </script>
 
 <template>
-  <div class="no-print fixed bottom-6 right-6 z-50">
+  <div class="no-print fixed inset-x-4 bottom-4 z-50 pb-[env(safe-area-inset-bottom,0px)] sm:inset-x-auto sm:bottom-6 sm:right-6">
     <button
       v-if="!open"
-      class="flex items-center gap-2 rounded-2xl bg-brand px-5 py-3 text-sm font-semibold text-brand-fg shadow-xl shadow-brand/30 transition hover:bg-brand-hover"
+      class="ml-auto flex items-center gap-2 rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-brand-fg shadow-xl shadow-brand/30 transition hover:bg-brand-hover sm:px-5"
       @click="open = true"
     >
       <CalculatorIcon class="h-4 w-4" />
-      FX Calculator
+      <span class="hidden sm:inline">FX Calculator</span>
     </button>
 
-    <div v-else class="w-80 overflow-hidden rounded-2xl border border-line bg-elevated shadow-2xl">
+    <div v-else class="mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-line bg-elevated shadow-2xl sm:mx-0 sm:w-80">
       <div class="flex items-center justify-between border-b border-line bg-brand px-5 py-3.5">
         <div class="flex items-center gap-2 text-brand-fg">
           <CalculatorIcon class="h-4 w-4 opacity-70" />
@@ -44,14 +44,14 @@ function updateRate(value: number) {
       <div class="space-y-4 p-5">
         <label class="block">
           <span class="text-[10px] font-bold uppercase tracking-wider text-muted">Rate</span>
-          <div class="mt-1.5 flex items-center gap-2">
+          <div class="mt-1.5 flex flex-wrap items-center gap-2">
             <span class="text-sm text-muted">1 USD =</span>
             <input
               :value="store.usdRate"
               type="number"
               min="0"
               step="0.01"
-              class="input-field flex-1 font-mono-nums font-semibold"
+              class="input-field min-w-0 flex-1 font-mono-nums font-semibold"
               @input="updateRate(parseFloat(($event.target as HTMLInputElement).value) || 0)"
             />
             <span class="text-sm font-semibold text-brand">Br</span>

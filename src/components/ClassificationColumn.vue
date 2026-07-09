@@ -39,7 +39,7 @@ function onDrop(e: DragEvent) {
 </script>
 
 <template>
-  <div class="flex w-[208px] flex-col items-stretch">
+  <div class="flex w-full max-w-[208px] shrink-0 flex-col items-stretch sm:w-[208px]">
     <!-- Classification header -->
     <div
       class="group relative overflow-hidden rounded-2xl px-4 py-4 shadow-md ring-1 ring-black/[0.06]"

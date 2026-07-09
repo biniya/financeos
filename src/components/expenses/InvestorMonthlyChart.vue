@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useWindowSize } from '@vueuse/core'
 import { use } from 'echarts/core'
 import { BarChart } from 'echarts/charts'
 import { TooltipComponent, LegendComponent, GridComponent } from 'echarts/components'
@@ -11,6 +12,7 @@ import { formatNumber } from '@/utils/format'
 use([BarChart, TooltipComponent, LegendComponent, GridComponent, CanvasRenderer])
 
 const store = useTransactionsStore()
+const { width } = useWindowSize()
 
 const CHART_HEIGHT = 260
 
@@ -22,11 +24,16 @@ const chartCaption = computed(() =>
 
 const monthlyBar = computed(() => {
   const months = store.byMonth
+  const compact = width.value < 640
   return {
     tooltip: { trigger: 'axis' },
-    legend: { bottom: 0, textStyle: { fontSize: 12 } },
-    grid: { left: 56, right: 16, top: 24, bottom: 48 },
-    xAxis: { type: 'category', data: months.map((m) => m.month), axisLabel: { fontSize: 11 } },
+    legend: { bottom: 0, textStyle: { fontSize: compact ? 10 : 12 } },
+    grid: { left: compact ? 40 : 56, right: 12, top: 20, bottom: compact ? 44 : 48 },
+    xAxis: {
+      type: 'category',
+      data: months.map((m) => m.month),
+      axisLabel: { fontSize: compact ? 9 : 11, rotate: compact && months.length > 4 ? 30 : 0 },
+    },
     yAxis: {
       type: 'value',
       axisLabel: { fontSize: 11, formatter: (v: number) => formatNumber(v) },

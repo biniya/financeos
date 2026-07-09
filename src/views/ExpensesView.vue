@@ -84,16 +84,16 @@ async function resetExpenses() {
 </script>
 
 <template>
-  <main class="mx-auto max-w-7xl space-y-6 px-5 py-6 lg:px-8">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <h1 class="font-display text-2xl font-semibold text-ink">Expenses</h1>
+  <main class="mx-auto max-w-7xl space-y-6 px-4 py-6 pb-8 sm:px-5 lg:px-8">
+    <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+      <div class="min-w-0">
+        <h1 class="font-display text-xl font-semibold text-ink sm:text-2xl">Expenses</h1>
         <p class="mt-1 text-sm text-muted">
           <template v-if="tab === 'overview'">Financial snapshot for stakeholders.</template>
           <template v-else>Import your bank CSV, categorize each row yourself, then see where money went.</template>
         </p>
       </div>
-      <div class="flex flex-wrap gap-2">
+      <div class="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
         <button
           v-if="hasData"
           type="button"
@@ -101,15 +101,17 @@ async function resetExpenses() {
           @click="confirmReset = true"
         >
           <TrashIcon class="h-4 w-4" />
-          Reset expenses
+          <span class="hidden sm:inline">Reset expenses</span>
+          <span class="sm:hidden">Reset</span>
         </button>
-        <button type="button" class="btn-secondary" @click="openAdd">
+        <button type="button" class="btn-secondary flex-1 sm:flex-none" @click="openAdd">
           <PlusIcon class="h-4 w-4" />
-          Add transaction
+          <span class="hidden sm:inline">Add transaction</span>
+          <span class="sm:hidden">Add</span>
         </button>
-        <button type="button" class="btn-primary" @click="showImport = !showImport">
+        <button type="button" class="btn-primary flex-1 sm:flex-none" @click="showImport = !showImport">
           <ArrowUpTrayIcon class="h-4 w-4" />
-          {{ showImport ? 'Close import' : 'Import CSV' }}
+          {{ showImport ? 'Close' : 'Import' }}
         </button>
       </div>
     </div>
@@ -120,24 +122,24 @@ async function resetExpenses() {
 
     <ImportPanel v-if="showImport" @imported="onImported" />
 
-    <div v-if="hasData" class="flex flex-wrap gap-1 rounded-xl bg-surface-2 p-1">
+    <div v-if="hasData" class="grid grid-cols-3 gap-1 rounded-xl bg-surface-2 p-1">
       <button
         type="button"
-        class="flex-1 min-w-[5rem] rounded-lg px-3 py-2 text-sm font-semibold transition"
+        class="min-w-0 rounded-lg px-2 py-2 text-xs font-semibold transition sm:px-3 sm:text-sm"
         :class="tab === 'inbox' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
         @click="tab = 'inbox'"
       >
         Inbox
         <span
           v-if="store.inboxCount"
-          class="ml-1.5 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+          class="ml-1 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
         >
           {{ store.inboxCount }}
         </span>
       </button>
       <button
         type="button"
-        class="flex-1 min-w-[5rem] rounded-lg px-3 py-2 text-sm font-semibold transition"
+        class="min-w-0 rounded-lg px-2 py-2 text-xs font-semibold transition sm:px-3 sm:text-sm"
         :class="tab === 'overview' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
         @click="tab = 'overview'"
       >
@@ -145,11 +147,12 @@ async function resetExpenses() {
       </button>
       <button
         type="button"
-        class="flex-1 min-w-[5rem] rounded-lg px-3 py-2 text-sm font-semibold transition"
+        class="min-w-0 rounded-lg px-2 py-2 text-xs font-semibold transition sm:px-3 sm:text-sm"
         :class="tab === 'all' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
         @click="tab = 'all'"
       >
-        All transactions
+        <span class="sm:hidden">All</span>
+        <span class="hidden sm:inline">All transactions</span>
       </button>
     </div>
 
@@ -157,7 +160,7 @@ async function resetExpenses() {
       <CategorizeInbox v-if="tab === 'inbox'" />
 
       <template v-else-if="tab === 'overview'">
-        <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p class="text-xs text-muted">
             <template v-if="store.overviewExpenseMode === 'recurring'">
               Showing operating expenses — one-time purchases excluded.
@@ -166,22 +169,24 @@ async function resetExpenses() {
               Showing all expenses, including one-time purchases.
             </template>
           </p>
-          <div class="segmented">
+          <div class="segmented w-full sm:w-auto">
             <button
               type="button"
-              class="segmented-btn"
+              class="segmented-btn flex-1 justify-center"
               :class="store.overviewExpenseMode === 'all' ? 'segmented-btn-active' : ''"
               @click="store.overviewExpenseMode = 'all'"
             >
-              All expenses
+              <span class="hidden sm:inline">All expenses</span>
+              <span class="sm:hidden">All</span>
             </button>
             <button
               type="button"
-              class="segmented-btn"
+              class="segmented-btn flex-1 justify-center"
               :class="store.overviewExpenseMode === 'recurring' ? 'segmented-btn-active' : ''"
               @click="store.overviewExpenseMode = 'recurring'"
             >
-              Exclude one-time
+              <span class="hidden sm:inline">Exclude one-time</span>
+              <span class="sm:hidden">Recurring</span>
             </button>
           </div>
         </div>

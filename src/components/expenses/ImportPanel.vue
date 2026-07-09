@@ -105,7 +105,7 @@ function reprocessPreview() {
     <div v-if="preview.length" class="mt-6 border-t border-line pt-4">
       <p class="text-xs font-bold uppercase tracking-wider text-muted">Preview (first 5 rows)</p>
       <ul class="mt-2 space-y-1 text-xs text-ink">
-        <li v-for="t in preview" :key="t.id" class="rounded-lg bg-surface px-3 py-2">
+        <li v-for="t in preview" :key="t.id" class="break-words rounded-lg bg-surface px-3 py-2">
           {{ t.date }} · {{ t.type }} · Br {{ t.amount }} — {{ t.description || '—' }}
           <span v-if="t.importHint" class="text-muted"> (was: {{ t.importHint }})</span>
         </li>

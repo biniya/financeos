@@ -14,7 +14,7 @@ function onDropCategory(toClassificationId: string, categoryId: string, fromClas
 </script>
 
 <template>
-  <main id="print-area" class="mx-auto max-w-7xl px-5 py-6 lg:px-8">
+  <main id="print-area" class="mx-auto max-w-7xl overflow-x-clip px-4 py-6 pb-24 sm:px-5 sm:pb-6 lg:px-8">
     <div class="print-only mb-8 text-center">
       <h1 class="font-display text-2xl font-bold text-ink">{{ store.data?.name || store.activePlan?.label }}</h1>
       <p class="mt-1 text-sm text-muted">{{ new Date().toLocaleDateString() }}</p>
@@ -32,16 +32,18 @@ function onDropCategory(toClassificationId: string, categoryId: string, fromClas
 
       <template v-if="store.data?.classifications.length">
         <div class="tree-stem h-6" />
-        <div
-          class="tree-bar"
-          :style="{ width: `${Math.min(store.data.classifications.length * 224, 1150)}px` }"
-        />
+        <div class="w-full max-w-full px-1">
+          <div
+            class="tree-bar mx-auto"
+            :style="{ width: `min(100%, ${Math.min(store.data.classifications.length * 224, 1150)}px)` }"
+          />
+        </div>
       </template>
     </div>
 
     <div
       v-if="store.data?.classifications.length"
-      class="mt-0 flex flex-wrap justify-center gap-x-5 gap-y-12"
+      class="mt-0 flex w-full max-w-full flex-wrap justify-center gap-x-4 gap-y-12 sm:gap-x-5"
     >
       <ClassificationColumn
         v-for="classification in store.data.classifications"

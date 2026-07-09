@@ -172,15 +172,17 @@ function fmtDate(date: string) {
             </tr>
             <tr v-if="expandedId === tx.id" class="bg-surface">
               <td colspan="7" class="px-4 py-2 text-xs text-muted">
-                <span v-if="tx.reference"><strong>Reference:</strong> {{ tx.reference }}</span>
-                <span v-if="tx.account" class="ml-4"><strong>Account:</strong> {{ tx.account }}</span>
-                <span v-if="tx.importHint" class="ml-4"><strong>Bank hint:</strong> {{ tx.importHint }}</span>
-                <button
-                  class="ml-4 text-red-600 hover:underline"
-                  @click.stop="store.removeTransaction(tx.id)"
-                >
-                  Delete
-                </button>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+                  <span v-if="tx.reference"><strong>Reference:</strong> {{ tx.reference }}</span>
+                  <span v-if="tx.account"><strong>Account:</strong> {{ tx.account }}</span>
+                  <span v-if="tx.importHint"><strong>Bank hint:</strong> {{ tx.importHint }}</span>
+                  <button
+                    class="text-red-600 hover:underline"
+                    @click.stop="store.removeTransaction(tx.id)"
+                  >
+                    Delete
+                  </button>
+                </div>
               </td>
             </tr>
           </template>

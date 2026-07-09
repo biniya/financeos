@@ -89,29 +89,29 @@ function next() {
   </div>
 
   <div v-else class="space-y-4">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="min-w-0">
         <p class="text-xs font-bold uppercase tracking-wider text-muted">Categorize inbox</p>
         <p class="mt-0.5 text-sm text-ink">
           <span class="font-semibold text-brand">{{ remaining }}</span> left · {{ progress }}% done
         </p>
       </div>
-      <div class="h-2 w-40 overflow-hidden rounded-full bg-surface-2">
+      <div class="h-2 w-full overflow-hidden rounded-full bg-surface-2 sm:w-40">
         <div class="h-full rounded-full bg-brand transition-all" :style="{ width: `${progress}%` }" />
       </div>
     </div>
 
     <div class="card overflow-hidden">
       <div class="border-b border-line bg-surface px-5 py-4">
-        <div class="flex items-start justify-between gap-4">
-          <div>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div class="min-w-0">
             <p class="text-xs font-semibold uppercase tracking-wider text-muted">{{ fmtDate(current!.date) }}</p>
-            <p class="mt-1 font-display text-xl font-semibold text-ink">
+            <p class="mt-1 break-words font-display text-lg font-semibold text-ink sm:text-xl">
               {{ current!.description || 'No description' }}
             </p>
             <p v-if="current!.account" class="mt-1 text-xs text-muted">{{ current!.account }}</p>
           </div>
-          <div class="text-right">
+          <div class="flex items-center justify-between gap-4 sm:block sm:text-right">
             <span
               class="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase"
               :class="current!.type === 'income' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'"
