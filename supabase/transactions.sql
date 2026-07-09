@@ -14,6 +14,7 @@ create table if not exists public.transactions (
   reporting text not null default 'unreported',
   description text not null default '',
   reference text not null default '',
+  is_one_time boolean not null default false,
   imported_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

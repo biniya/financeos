@@ -15,6 +15,7 @@ interface TransactionRow {
   reporting: string
   description: string
   reference: string
+  is_one_time: boolean
   imported_at: string
   updated_at: string
 }
@@ -32,6 +33,7 @@ function toTransaction(row: TransactionRow): Transaction {
     reporting: row.reporting as Transaction['reporting'],
     description: row.description,
     reference: row.reference,
+    isOneTime: row.is_one_time ?? false,
     importedAt: row.imported_at,
   }
 }
@@ -62,6 +64,7 @@ export async function upsertTransaction(userId: string, tx: Transaction): Promis
     reporting: tx.reporting,
     description: tx.description,
     reference: tx.reference,
+    is_one_time: tx.isOneTime ?? false,
     imported_at: tx.importedAt,
     updated_at: new Date().toISOString(),
   })
@@ -85,6 +88,7 @@ export async function upsertTransactions(userId: string, txs: Transaction[]): Pr
     reporting: tx.reporting,
     description: tx.description,
     reference: tx.reference,
+    is_one_time: tx.isOneTime ?? false,
     imported_at: tx.importedAt,
     updated_at: new Date().toISOString(),
   }))

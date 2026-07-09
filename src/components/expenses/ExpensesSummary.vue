@@ -18,25 +18,34 @@ const rangeLabel = computed(() => {
   <div class="relative w-full overflow-hidden rounded-2xl bg-brand text-brand-fg shadow-lg shadow-brand/20 ring-1 ring-white/10">
     <div class="absolute inset-x-0 top-0 h-1 bg-accent" />
 
-    <div class="relative grid gap-4 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="relative grid gap-4 px-5 py-4 sm:grid-cols-2 lg:grid-cols-5">
       <div>
         <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">Money in</p>
         <p class="mt-1 font-mono-nums text-xl font-semibold text-emerald-300">Br {{ formatNumber(store.totalIncome) }}</p>
       </div>
 
       <div>
-        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">Money out</p>
+        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">Money out (all)</p>
         <p class="mt-1 font-mono-nums text-xl font-semibold text-red-300">Br {{ formatNumber(store.totalExpenses) }}</p>
+        <p v-if="store.totalOneTimeExpenses > 0" class="mt-0.5 text-[11px] text-white/40">
+          One-time: Br {{ formatNumber(store.totalOneTimeExpenses) }}
+        </p>
       </div>
 
       <div>
-        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">Net flow</p>
+        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">Money out (recurring)</p>
+        <p class="mt-1 font-mono-nums text-xl font-semibold text-red-200">Br {{ formatNumber(store.totalRecurringExpenses) }}</p>
+      </div>
+
+      <div>
+        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">Net flow (recurring)</p>
         <p
           class="mt-1 font-mono-nums text-xl font-semibold"
-          :class="store.netFlow >= 0 ? 'text-emerald-300' : 'text-red-300'"
+          :class="store.netFlowRecurring >= 0 ? 'text-emerald-300' : 'text-red-300'"
         >
-          Br {{ formatNumber(store.netFlow) }}
+          Br {{ formatNumber(store.netFlowRecurring) }}
         </p>
+        <p class="mt-0.5 text-[11px] text-white/40">All-in: Br {{ formatNumber(store.netFlow) }}</p>
       </div>
 
       <div>

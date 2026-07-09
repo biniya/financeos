@@ -12,6 +12,7 @@ const { classificationOptions, categoriesForClassification } = useCategorySugges
 const index = ref(0)
 const classification = ref('')
 const category = ref('')
+const isOneTime = ref(false)
 const saving = ref(false)
 
 const queue = computed(() => store.inbox)
@@ -29,6 +30,7 @@ watch(current, (tx) => {
   if (!tx) return
   classification.value = tx.classification || ''
   category.value = tx.category || ''
+  isOneTime.value = tx.isOneTime ?? false
   if (tx.importHint) {
     const parts = tx.importHint.split(' · ')
     if (!classification.value && parts.length > 1) classification.value = parts[parts.length - 1] ?? ''
@@ -53,7 +55,12 @@ async function saveAndNext() {
   if (!classification.value.trim() || !category.value.trim()) return
   saving.value = true
   try {
-    await store.categorizeTransaction(current.value.id, category.value, classification.value)
+    await store.categorizeTransaction(
+      current.value.id,
+      category.value,
+      classification.value,
+      current.value.type === 'expense' ? isOneTime.value : false,
+    )
     if (index.value >= store.inbox.length) index.value = Math.max(0, store.inbox.length - 1)
   } finally {
     saving.value = false
@@ -177,6 +184,15 @@ function next() {
             </button>
           </div>
         </div>
+
+        <label v-if="current!.type === 'expense'" class="flex cursor-pointer items-center gap-3 rounded-xl bg-surface px-4 py-3">
+          <input
+            v-model="isOneTime"
+            type="checkbox"
+            class="rounded border-line text-brand focus:ring-brand"
+          />
+          <span class="text-xs font-semibold text-ink">One-time expense</span>
+        </label>
 
         <div class="flex flex-wrap gap-2 border-t border-line pt-4">
           <button type="button" class="btn-secondary" :disabled="index === 0" @click="prev">

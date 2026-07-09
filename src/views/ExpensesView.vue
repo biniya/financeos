@@ -132,6 +132,27 @@ function closeEditor() {
         <p v-if="store.inboxCount" class="rounded-xl bg-amber-50 px-4 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
           {{ store.inboxCount }} transactions still need categories — charts only include categorized rows.
         </p>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p class="text-xs font-bold uppercase tracking-wider text-muted">Chart view</p>
+          <div class="segmented">
+            <button
+              type="button"
+              class="segmented-btn"
+              :class="store.overviewExpenseMode === 'all' ? 'segmented-btn-active' : ''"
+              @click="store.overviewExpenseMode = 'all'"
+            >
+              All expenses
+            </button>
+            <button
+              type="button"
+              class="segmented-btn"
+              :class="store.overviewExpenseMode === 'recurring' ? 'segmented-btn-active' : ''"
+              @click="store.overviewExpenseMode = 'recurring'"
+            >
+              Exclude one-time
+            </button>
+          </div>
+        </div>
         <ExpensesCharts />
         <div>
           <h2 class="mb-3 text-xs font-bold uppercase tracking-wider text-muted">Spend by classification</h2>

@@ -18,6 +18,8 @@ export interface Transaction {
   importedAt: string
   /** Original CSV category/classification hint — shown while you categorize */
   importHint?: string
+  /** Expense-only flag — orthogonal to category/classification */
+  isOneTime?: boolean
 }
 
 export interface ImportOptions {
@@ -58,8 +60,11 @@ export type TransactionPatch = Partial<
     | 'description'
     | 'reference'
     | 'importHint'
+    | 'isOneTime'
   >
 >
+
+export type OverviewExpenseMode = 'all' | 'recurring'
 
 /** Common classifications — matches Plan tree vocabulary */
 export const DEFAULT_CLASSIFICATIONS = [
@@ -85,4 +90,8 @@ export function displayCategory(tx: Pick<Transaction, 'category'>): string {
 export function displayClassification(tx: Pick<Transaction, 'classification'>): string {
   const c = tx.classification.trim()
   return c && c !== 'Unclassified' ? c : '—'
+}
+
+export function isOneTimeExpense(tx: Pick<Transaction, 'type' | 'isOneTime'>): boolean {
+  return tx.type === 'expense' && tx.isOneTime === true
 }

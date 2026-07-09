@@ -93,10 +93,18 @@ const classificationHeight = computed(() => {
   const count = Math.min(store.byClassification.length, 6)
   return Math.min(CHART_HEIGHT, Math.max(120, count * 28 + 48))
 })
+
+const chartCaption = computed(() =>
+  store.overviewExpenseMode === 'recurring'
+    ? 'Charts exclude one-time expenses'
+    : 'Charts include all expenses',
+)
 </script>
 
 <template>
-  <div class="grid gap-4 lg:grid-cols-3">
+  <div class="space-y-2">
+    <p class="text-xs text-muted">{{ chartCaption }}</p>
+    <div class="grid gap-4 lg:grid-cols-3">
     <div class="card p-4">
       <h3 class="text-xs font-bold uppercase tracking-wider text-muted">By category</h3>
       <div class="mt-2 w-full overflow-hidden" :style="{ height: `${CHART_HEIGHT}px` }">
@@ -116,6 +124,7 @@ const classificationHeight = computed(() => {
       <div class="mt-2 w-full overflow-hidden" :style="{ height: `${classificationHeight}px` }">
         <VChart :option="classificationBar" autoresize class="h-full w-full" />
       </div>
+    </div>
     </div>
   </div>
 </template>

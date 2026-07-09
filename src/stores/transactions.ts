@@ -1,6 +1,12 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { ImportOptions, ImportResult, Transaction, TransactionPatch } from '@/types/transactions'
+import type {
+  ImportOptions,
+  ImportResult,
+  OverviewExpenseMode,
+  Transaction,
+  TransactionPatch,
+} from '@/types/transactions'
 import { isUncategorized } from '@/types/transactions'
 import { isSupabaseConfigured } from '@/lib/supabase'
 import {
@@ -14,10 +20,12 @@ import { useAuthStore } from '@/stores/auth'
 import { dedupeImport, parseTransactionsCsv } from '@/utils/csvImport'
 import {
   dateRange,
+  filterForOverview,
   groupByCategory,
   groupByClassification,
   groupByMonth,
   sumByType,
+  sumOneTimeExpenses,
   uncategorizedTransactions,
   uniqueValues,
 } from '@/utils/transactionAnalytics'
@@ -50,6 +58,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const ready = ref(false)
   const syncing = ref(false)
   const syncError = ref<string | null>(null)
+  const overviewExpenseMode = ref<OverviewExpenseMode>('recurring')
 
   let syncTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -58,11 +67,19 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const inboxCount = computed(() => inbox.value.length)
   const categorizedCount = computed(() => transactions.value.length - inboxCount.value)
   const totalExpenses = computed(() => sumByType(transactions.value, 'expense'))
+  const totalRecurringExpenses = computed(() =>
+    sumByType(transactions.value, 'expense', { excludeOneTime: true }),
+  )
+  const totalOneTimeExpenses = computed(() => sumOneTimeExpenses(transactions.value))
   const totalIncome = computed(() => sumByType(transactions.value, 'income'))
   const netFlow = computed(() => totalIncome.value - totalExpenses.value)
-  const byCategory = computed(() => groupByCategory(transactions.value, 'expense'))
-  const byClassification = computed(() => groupByClassification(transactions.value, 'expense'))
-  const byMonth = computed(() => groupByMonth(transactions.value))
+  const netFlowRecurring = computed(() => totalIncome.value - totalRecurringExpenses.value)
+  const filteredForOverview = computed(() =>
+    filterForOverview(transactions.value, overviewExpenseMode.value),
+  )
+  const byCategory = computed(() => groupByCategory(filteredForOverview.value, 'expense'))
+  const byClassification = computed(() => groupByClassification(filteredForOverview.value, 'expense'))
+  const byMonth = computed(() => groupByMonth(filteredForOverview.value))
   const range = computed(() => dateRange(transactions.value))
   const categories = computed(() => uniqueValues(transactions.value, 'category'))
   const classifications = computed(() => uniqueValues(transactions.value, 'classification'))
@@ -171,6 +188,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     const idx = transactions.value.findIndex((t) => t.id === id)
     if (idx === -1) return null
     const updated = { ...transactions.value[idx]!, ...patch }
+    if (updated.type === 'income') updated.isOneTime = false
     transactions.value = sortTransactions([
       ...transactions.value.slice(0, idx),
       updated,
@@ -189,12 +207,15 @@ export const useTransactionsStore = defineStore('transactions', () => {
     id: string,
     category: string,
     classification: string,
+    isOneTime?: boolean,
   ) {
-    await updateTransaction(id, {
+    const patch: TransactionPatch = {
       category: category.trim(),
       classification: classification.trim(),
       importHint: undefined,
-    })
+    }
+    if (isOneTime !== undefined) patch.isOneTime = isOneTime
+    await updateTransaction(id, patch)
   }
 
   function createEmptyTransaction(): Transaction {
@@ -211,6 +232,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       reporting: 'unreported',
       description: '',
       reference: '',
+      isOneTime: false,
       importedAt: now(),
     }
   }
@@ -221,6 +243,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       ...input,
       id: input.id ?? uid(),
       importedAt: now(),
+      isOneTime: input.type === 'income' ? false : (input.isOneTime ?? false),
     }
     transactions.value = sortTransactions([tx, ...transactions.value])
     await syncOne(tx)
@@ -283,13 +306,18 @@ export const useTransactionsStore = defineStore('transactions', () => {
     ready,
     syncing,
     syncError,
+    overviewExpenseMode,
     isCloud,
     inbox,
     inboxCount,
     categorizedCount,
     totalExpenses,
+    totalRecurringExpenses,
+    totalOneTimeExpenses,
     totalIncome,
     netFlow,
+    netFlowRecurring,
+    filteredForOverview,
     byCategory,
     byClassification,
     byMonth,

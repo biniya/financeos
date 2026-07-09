@@ -121,6 +121,7 @@ export function parseTransactionsCsv(text: string, options: ImportOptions = {}):
       reporting: mapReporting(get('reporting')),
       description: get('description'),
       reference: get('reference'),
+      isOneTime: false,
       importedAt: now(),
       importHint,
     })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { Transaction } from '@/types/transactions'
-import { isUncategorized } from '@/types/transactions'
+import { isOneTimeExpense, isUncategorized } from '@/types/transactions'
 import { useTransactionsStore } from '@/stores/transactions'
 import { formatAmount } from '@/utils/format'
 import { format, parseISO } from 'date-fns'
@@ -20,6 +20,7 @@ const categoryFilter = ref('all')
 const classificationFilter = ref('all')
 const monthFilter = ref('all')
 const showUncategorizedOnly = ref(false)
+const showOneTimeOnly = ref(false)
 const expandedId = ref<string | null>(null)
 
 const months = computed(() => {
@@ -33,6 +34,7 @@ const filtered = computed(() => {
 
   if (typeFilter.value !== 'all') list = list.filter((t) => t.type === typeFilter.value)
   if (showUncategorizedOnly.value) list = list.filter(isUncategorized)
+  if (showOneTimeOnly.value) list = list.filter(isOneTimeExpense)
   if (categoryFilter.value !== 'all') list = list.filter((t) => t.category.trim() === categoryFilter.value)
   if (classificationFilter.value !== 'all') list = list.filter((t) => t.classification.trim() === classificationFilter.value)
   if (monthFilter.value !== 'all') list = list.filter((t) => t.date.startsWith(monthFilter.value))
@@ -88,6 +90,10 @@ function fmtDate(date: string) {
           <option v-for="m in months" :key="m" :value="m">{{ m }}</option>
         </select>
         <label class="flex items-center gap-1.5 rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-muted">
+          <input v-model="showOneTimeOnly" type="checkbox" class="rounded border-line text-brand" />
+          One-time only
+        </label>
+        <label class="flex items-center gap-1.5 rounded-lg bg-surface-2 px-2.5 py-1.5 text-xs text-muted">
           <input v-model="showUncategorizedOnly" type="checkbox" class="rounded border-line text-brand" />
           Inbox only
         </label>
@@ -127,6 +133,12 @@ function fmtDate(date: string) {
                   :class="tx.type === 'income' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'"
                 >
                   {{ tx.type }}
+                </span>
+                <span
+                  v-if="isOneTimeExpense(tx)"
+                  class="ml-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-800"
+                >
+                  One-time
                 </span>
               </td>
               <td

@@ -26,8 +26,14 @@ const amount = ref('')
 const reporting = ref<'unreported' | 'reported'>('unreported')
 const description = ref('')
 const reference = ref('')
+const isOneTime = ref(false)
 
 const categoryList = computed(() => categoriesForClassification(classification.value))
+const isExpense = computed(() => type.value === 'expense')
+
+watch(type, (t) => {
+  if (t === 'income') isOneTime.value = false
+})
 
 watch(
   () => props.transaction,
@@ -44,6 +50,7 @@ watch(
       reporting.value = 'unreported'
       description.value = ''
       reference.value = ''
+      isOneTime.value = false
       return
     }
     date.value = tx.date
@@ -56,6 +63,7 @@ watch(
     reporting.value = tx.reporting
     description.value = tx.description
     reference.value = tx.reference
+    isOneTime.value = tx.isOneTime ?? false
   },
   { immediate: true },
 )
@@ -77,6 +85,7 @@ function submit() {
     description: description.value.trim(),
     reference: reference.value.trim(),
     importHint: undefined,
+    isOneTime: isExpense.value ? isOneTime.value : false,
   })
 }
 </script>
@@ -173,6 +182,18 @@ function submit() {
             <option value="unreported">Unreported</option>
             <option value="reported">Reported</option>
           </select>
+        </label>
+
+        <label v-if="isExpense" class="flex cursor-pointer items-center gap-3 rounded-xl bg-surface px-4 py-3">
+          <input
+            v-model="isOneTime"
+            type="checkbox"
+            class="rounded border-line text-brand focus:ring-brand"
+          />
+          <span class="text-xs">
+            <span class="font-semibold text-ink">One-time expense</span>
+            <span class="mt-0.5 block text-muted">Mark large or unusual purchases you want to exclude from recurring spend views.</span>
+          </span>
         </label>
 
         <p v-if="transaction?.importHint" class="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 ring-1 ring-amber-200">
