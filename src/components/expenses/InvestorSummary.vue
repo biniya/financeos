@@ -12,6 +12,18 @@ const rangeLabel = computed(() => {
   const max = format(parseISO(store.range.max), 'MMM d, yyyy')
   return min === max ? min : `${min} – ${max}`
 })
+
+const excludeOneTime = computed(() => store.overviewExpenseMode === 'recurring')
+
+const expenseHint = computed(() =>
+  excludeOneTime.value
+    ? 'Operating spend (one-time excluded)'
+    : 'All expenses including one-time',
+)
+
+const netHint = computed(() =>
+  excludeOneTime.value ? 'Income minus operating expenses' : 'Income minus all expenses',
+)
 </script>
 
 <template>
@@ -35,25 +47,36 @@ const rangeLabel = computed(() => {
         <div class="text-center sm:border-x sm:border-white/10">
           <p class="text-xs font-semibold uppercase tracking-[0.15em] text-white/50">Expenses</p>
           <p class="mt-2 font-mono-nums text-3xl font-bold text-red-300 sm:text-4xl">
-            Br {{ formatNumber(store.totalRecurringExpenses) }}
+            Br {{ formatNumber(store.overviewExpenses) }}
           </p>
-          <p class="mt-1 text-xs text-white/40">Operating spend (excl. one-time)</p>
+          <p class="mt-1 text-xs text-white/40">{{ expenseHint }}</p>
         </div>
 
         <div class="text-center">
           <p class="text-xs font-semibold uppercase tracking-[0.15em] text-white/50">Net</p>
           <p
             class="mt-2 font-mono-nums text-3xl font-bold sm:text-4xl"
-            :class="store.netFlowRecurring >= 0 ? 'text-emerald-300' : 'text-red-300'"
+            :class="store.overviewNet >= 0 ? 'text-emerald-300' : 'text-red-300'"
           >
-            Br {{ formatNumber(store.netFlowRecurring) }}
+            Br {{ formatNumber(store.overviewNet) }}
           </p>
-          <p class="mt-1 text-xs text-white/40">Income minus operating expenses</p>
+          <p class="mt-1 text-xs text-white/40">{{ netHint }}</p>
         </div>
       </div>
 
-      <p v-if="store.totalOneTimeExpenses > 0" class="mt-6 text-center text-xs text-white/35">
-        One-time purchases excluded from expenses: Br {{ formatNumber(store.totalOneTimeExpenses) }}
+      <p
+        v-if="store.totalOneTimeExpenses > 0 && excludeOneTime"
+        class="mt-6 text-center text-xs text-white/35"
+      >
+        One-time excluded: Br {{ formatNumber(store.totalOneTimeExpenses) }}
+        · All expenses would be Br {{ formatNumber(store.totalExpenses) }}
+      </p>
+      <p
+        v-else-if="store.totalOneTimeExpenses > 0 && !excludeOneTime"
+        class="mt-6 text-center text-xs text-white/35"
+      >
+        Includes one-time: Br {{ formatNumber(store.totalOneTimeExpenses) }}
+        · Excluding one-time: Br {{ formatNumber(store.totalRecurringExpenses) }}
       </p>
     </div>
   </div>

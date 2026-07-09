@@ -14,8 +14,14 @@ const store = useTransactionsStore()
 
 const CHART_HEIGHT = 260
 
+const chartCaption = computed(() =>
+  store.overviewExpenseMode === 'recurring'
+    ? 'Operating expenses only — one-time excluded'
+    : 'All expenses including one-time purchases',
+)
+
 const monthlyBar = computed(() => {
-  const months = store.byMonthRecurring
+  const months = store.byMonth
   return {
     tooltip: { trigger: 'axis' },
     legend: { bottom: 0, textStyle: { fontSize: 12 } },
@@ -50,7 +56,7 @@ const monthlyBar = computed(() => {
 <template>
   <div class="card p-5">
     <h3 class="text-sm font-semibold text-ink">Monthly income vs expenses</h3>
-    <p class="mt-0.5 text-xs text-muted">Operating expenses only — one-time purchases excluded</p>
+    <p class="mt-0.5 text-xs text-muted">{{ chartCaption }}</p>
     <div class="mt-4 w-full overflow-hidden" :style="{ height: `${CHART_HEIGHT}px` }">
       <VChart :option="monthlyBar" autoresize class="h-full w-full" />
     </div>

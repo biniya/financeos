@@ -132,11 +132,39 @@ function closeEditor() {
       <CategorizeInbox v-if="tab === 'inbox'" />
 
       <template v-else-if="tab === 'overview'">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p class="text-xs text-muted">
+            <template v-if="store.overviewExpenseMode === 'recurring'">
+              Showing operating expenses — one-time purchases excluded.
+            </template>
+            <template v-else>
+              Showing all expenses, including one-time purchases.
+            </template>
+          </p>
+          <div class="segmented">
+            <button
+              type="button"
+              class="segmented-btn"
+              :class="store.overviewExpenseMode === 'all' ? 'segmented-btn-active' : ''"
+              @click="store.overviewExpenseMode = 'all'"
+            >
+              All expenses
+            </button>
+            <button
+              type="button"
+              class="segmented-btn"
+              :class="store.overviewExpenseMode === 'recurring' ? 'segmented-btn-active' : ''"
+              @click="store.overviewExpenseMode = 'recurring'"
+            >
+              Exclude one-time
+            </button>
+          </div>
+        </div>
         <InvestorSummary />
         <InvestorMonthlyChart />
         <div>
           <h2 class="mb-3 text-xs font-bold uppercase tracking-wider text-muted">Spend by area</h2>
-          <ClassificationSpendRow :items="store.byClassificationRecurring" />
+          <ClassificationSpendRow :items="store.byClassification" />
         </div>
       </template>
 

@@ -74,6 +74,12 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const totalIncome = computed(() => sumByType(transactions.value, 'income'))
   const netFlow = computed(() => totalIncome.value - totalExpenses.value)
   const netFlowRecurring = computed(() => totalIncome.value - totalRecurringExpenses.value)
+  const overviewExpenses = computed(() =>
+    overviewExpenseMode.value === 'all' ? totalExpenses.value : totalRecurringExpenses.value,
+  )
+  const overviewNet = computed(() =>
+    overviewExpenseMode.value === 'all' ? netFlow.value : netFlowRecurring.value,
+  )
   const filteredForOverview = computed(() =>
     filterForOverview(transactions.value, overviewExpenseMode.value),
   )
@@ -320,6 +326,8 @@ export const useTransactionsStore = defineStore('transactions', () => {
     totalIncome,
     netFlow,
     netFlowRecurring,
+    overviewExpenses,
+    overviewNet,
     filteredForOverview,
     byCategory,
     byClassification,
