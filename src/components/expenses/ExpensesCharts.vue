@@ -12,6 +12,8 @@ use([PieChart, BarChart, TooltipComponent, LegendComponent, GridComponent, Canva
 
 const store = useTransactionsStore()
 
+const CHART_HEIGHT = 200
+
 const brandColors = ['#163d2f', '#2c4a6e', '#8b5a2b', '#3d5a4c', '#4a3f6b', '#c17f4a', '#5c4a42', '#40916c']
 
 const categoryPie = computed(() => {
@@ -21,7 +23,8 @@ const categoryPie = computed(() => {
     color: brandColors,
     series: [{
       type: 'pie',
-      radius: ['42%', '70%'],
+      radius: ['40%', '68%'],
+      center: ['50%', '46%'],
       itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
       label: { fontSize: 10 },
       data: top.map((c) => ({ name: c.name, value: Math.round(c.amount) })),
@@ -33,32 +36,62 @@ const monthlyBar = computed(() => {
   const months = store.byMonth
   return {
     tooltip: { trigger: 'axis' },
-    legend: { bottom: 0, textStyle: { fontSize: 11 } },
-    grid: { left: 48, right: 16, top: 24, bottom: 40 },
-    xAxis: { type: 'category', data: months.map((m) => m.month) },
-    yAxis: { type: 'value', axisLabel: { formatter: (v: number) => formatNumber(v) } },
+    legend: { bottom: 0, textStyle: { fontSize: 10 } },
+    grid: { left: 44, right: 12, top: 16, bottom: 36, containLabel: false },
+    xAxis: { type: 'category', data: months.map((m) => m.month), axisLabel: { fontSize: 10 } },
+    yAxis: {
+      type: 'value',
+      axisLabel: { fontSize: 10, formatter: (v: number) => formatNumber(v) },
+      splitNumber: 4,
+    },
     color: ['#163d2f', '#c17f4a'],
     series: [
-      { name: 'Income', type: 'bar', data: months.map((m) => m.income), itemStyle: { borderRadius: [4, 4, 0, 0] } },
-      { name: 'Expense', type: 'bar', data: months.map((m) => m.expense), itemStyle: { borderRadius: [4, 4, 0, 0] } },
+      {
+        name: 'Income',
+        type: 'bar',
+        barMaxWidth: 36,
+        data: months.map((m) => m.income),
+        itemStyle: { borderRadius: [4, 4, 0, 0] },
+      },
+      {
+        name: 'Expense',
+        type: 'bar',
+        barMaxWidth: 36,
+        data: months.map((m) => m.expense),
+        itemStyle: { borderRadius: [4, 4, 0, 0] },
+      },
     ],
   }
 })
 
 const classificationBar = computed(() => {
-  const items = store.byClassification.slice(0, 8)
+  const items = store.byClassification.slice(0, 6)
   return {
     tooltip: { trigger: 'axis' },
-    grid: { left: 120, right: 24, top: 8, bottom: 8 },
-    xAxis: { type: 'value', axisLabel: { formatter: (v: number) => formatNumber(v) } },
-    yAxis: { type: 'category', data: items.map((i) => i.name).reverse(), axisLabel: { fontSize: 10 } },
+    grid: { left: 4, right: 16, top: 4, bottom: 4, containLabel: true },
+    xAxis: {
+      type: 'value',
+      axisLabel: { fontSize: 10, formatter: (v: number) => formatNumber(v) },
+      splitNumber: 3,
+    },
+    yAxis: {
+      type: 'category',
+      data: items.map((i) => i.name).reverse(),
+      axisLabel: { fontSize: 10, width: 88, overflow: 'truncate' },
+    },
     color: ['#163d2f'],
     series: [{
       type: 'bar',
+      barMaxWidth: 20,
       data: items.map((i) => i.amount).reverse(),
       itemStyle: { borderRadius: [0, 4, 4, 0] },
     }],
   }
+})
+
+const classificationHeight = computed(() => {
+  const count = Math.min(store.byClassification.length, 6)
+  return Math.min(CHART_HEIGHT, Math.max(120, count * 28 + 48))
 })
 </script>
 
@@ -66,15 +99,31 @@ const classificationBar = computed(() => {
   <div class="grid gap-4 lg:grid-cols-3">
     <div class="card p-4">
       <h3 class="text-xs font-bold uppercase tracking-wider text-muted">By category</h3>
-      <VChart class="mt-2 h-56 w-full" :option="categoryPie" autoresize />
+      <div class="mt-2 w-full overflow-hidden" :style="{ height: `${CHART_HEIGHT}px` }">
+        <VChart :option="categoryPie" autoresize class="h-full w-full" />
+      </div>
     </div>
+
     <div class="card p-4">
       <h3 class="text-xs font-bold uppercase tracking-wider text-muted">Monthly flow</h3>
-      <VChart class="mt-2 h-56 w-full" :option="monthlyBar" autoresize />
+      <div class="mt-2 w-full overflow-hidden" :style="{ height: `${CHART_HEIGHT}px` }">
+        <VChart :option="monthlyBar" autoresize class="h-full w-full" />
+      </div>
     </div>
+
     <div class="card p-4">
       <h3 class="text-xs font-bold uppercase tracking-wider text-muted">By classification</h3>
-      <VChart class="mt-2 h-56 w-full" :option="classificationBar" autoresize />
+      <div class="mt-2 w-full overflow-hidden" :style="{ height: `${classificationHeight}px` }">
+        <VChart :option="classificationBar" autoresize class="h-full w-full" />
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(.echarts) {
+  height: 100% !important;
+  width: 100% !important;
+  min-height: 0;
+}
+</style>
