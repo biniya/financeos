@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import type { Transaction } from '@/types/transactions'
-import ExpensesSummary from '@/components/expenses/ExpensesSummary.vue'
-import ExpensesCharts from '@/components/expenses/ExpensesCharts.vue'
+import InvestorSummary from '@/components/expenses/InvestorSummary.vue'
+import InvestorMonthlyChart from '@/components/expenses/InvestorMonthlyChart.vue'
 import ClassificationSpendRow from '@/components/expenses/ClassificationSpendRow.vue'
+import ExpenseProjection from '@/components/expenses/ExpenseProjection.vue'
 import TransactionLedger from '@/components/expenses/TransactionLedger.vue'
 import ImportPanel from '@/components/expenses/ImportPanel.vue'
 import CategorizeInbox from '@/components/expenses/CategorizeInbox.vue'
@@ -11,10 +12,10 @@ import TransactionEditor from '@/components/expenses/TransactionEditor.vue'
 import { useTransactionsStore } from '@/stores/transactions'
 import { ArrowUpTrayIcon, PlusIcon } from '@heroicons/vue/24/outline'
 
-type Tab = 'inbox' | 'overview' | 'all'
+type Tab = 'inbox' | 'overview' | 'projection' | 'all'
 
 const store = useTransactionsStore()
-const tab = ref<Tab>('inbox')
+const tab = ref<Tab>('overview')
 const showImport = ref(false)
 const importMessage = ref('')
 const editorOpen = ref(false)
@@ -26,7 +27,7 @@ const hasData = computed(() => store.transactions.length > 0)
 watch(
   () => store.inboxCount,
   (count) => {
-    if (count > 0 && tab.value === 'overview' && !hasData.value) tab.value = 'inbox'
+    if (count > 0 && (tab.value === 'overview' || tab.value === 'projection')) tab.value = 'inbox'
   },
 )
 
@@ -72,7 +73,10 @@ function closeEditor() {
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 class="font-display text-2xl font-semibold text-ink">Expenses</h1>
-        <p class="mt-1 text-sm text-muted">Import your bank CSV, categorize each row yourself, then see where money went.</p>
+        <p class="mt-1 text-sm text-muted">
+          <template v-if="tab === 'overview' || tab === 'projection'">Financial snapshot for stakeholders.</template>
+          <template v-else>Import your bank CSV, categorize each row yourself, then see where money went.</template>
+        </p>
       </div>
       <div class="flex flex-wrap gap-2">
         <button type="button" class="btn-secondary" @click="openAdd">
@@ -92,10 +96,10 @@ function closeEditor() {
 
     <ImportPanel v-if="showImport" @imported="onImported" />
 
-    <div v-if="hasData" class="flex gap-1 rounded-xl bg-surface-2 p-1">
+    <div v-if="hasData" class="flex flex-wrap gap-1 rounded-xl bg-surface-2 p-1">
       <button
         type="button"
-        class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition"
+        class="flex-1 min-w-[5rem] rounded-lg px-3 py-2 text-sm font-semibold transition"
         :class="tab === 'inbox' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
         @click="tab = 'inbox'"
       >
@@ -109,7 +113,7 @@ function closeEditor() {
       </button>
       <button
         type="button"
-        class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition"
+        class="flex-1 min-w-[5rem] rounded-lg px-3 py-2 text-sm font-semibold transition"
         :class="tab === 'overview' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
         @click="tab = 'overview'"
       >
@@ -117,48 +121,39 @@ function closeEditor() {
       </button>
       <button
         type="button"
-        class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition"
+        class="flex-1 min-w-[5rem] rounded-lg px-3 py-2 text-sm font-semibold transition"
+        :class="tab === 'projection' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
+        @click="tab = 'projection'"
+      >
+        Projection
+      </button>
+      <button
+        type="button"
+        class="flex-1 min-w-[5rem] rounded-lg px-3 py-2 text-sm font-semibold transition"
         :class="tab === 'all' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
         @click="tab = 'all'"
       >
-        All transactions
+        All
       </button>
     </div>
 
     <template v-if="hasData">
       <CategorizeInbox v-if="tab === 'inbox'" />
+
       <template v-else-if="tab === 'overview'">
-        <ExpensesSummary />
-        <p v-if="store.inboxCount" class="rounded-xl bg-amber-50 px-4 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
-          {{ store.inboxCount }} transactions still need categories — charts only include categorized rows.
-        </p>
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <p class="text-xs font-bold uppercase tracking-wider text-muted">Chart view</p>
-          <div class="segmented">
-            <button
-              type="button"
-              class="segmented-btn"
-              :class="store.overviewExpenseMode === 'all' ? 'segmented-btn-active' : ''"
-              @click="store.overviewExpenseMode = 'all'"
-            >
-              All expenses
-            </button>
-            <button
-              type="button"
-              class="segmented-btn"
-              :class="store.overviewExpenseMode === 'recurring' ? 'segmented-btn-active' : ''"
-              @click="store.overviewExpenseMode = 'recurring'"
-            >
-              Exclude one-time
-            </button>
-          </div>
-        </div>
-        <ExpensesCharts />
+        <InvestorSummary />
+        <InvestorMonthlyChart />
         <div>
-          <h2 class="mb-3 text-xs font-bold uppercase tracking-wider text-muted">Spend by classification</h2>
-          <ClassificationSpendRow :items="store.byClassification" />
+          <h2 class="mb-3 text-xs font-bold uppercase tracking-wider text-muted">Spend by area</h2>
+          <ClassificationSpendRow :items="store.byClassificationRecurring" />
         </div>
       </template>
+
+      <template v-else-if="tab === 'projection'">
+        <InvestorSummary />
+        <ExpenseProjection />
+      </template>
+
       <TransactionLedger
         v-else
         @edit="openEdit"

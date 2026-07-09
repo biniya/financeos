@@ -46,6 +46,13 @@ export interface MonthTotal {
   expense: number
 }
 
+export interface ClassificationProjection {
+  name: string
+  totalInPeriod: number
+  monthlyAverage: number
+  count: number
+}
+
 export type TransactionPatch = Partial<
   Pick<
     Transaction,
