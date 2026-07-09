@@ -1,4 +1,4 @@
-import type { CategoryTotal, ClassificationProjection, MonthTotal, OverviewExpenseMode, Transaction } from '@/types/transactions'
+import type { CategoryTotal, MonthTotal, OverviewExpenseMode, Transaction } from '@/types/transactions'
 import { isOneTimeExpense, isUncategorized } from '@/types/transactions'
 import { format, parseISO } from 'date-fns'
 
@@ -124,27 +124,4 @@ export function uniqueValues(transactions: Transaction[], field: 'category' | 'c
 
 export function uncategorizedTransactions(transactions: Transaction[]): Transaction[] {
   return transactions.filter(isUncategorized)
-}
-
-/** Distinct months with recurring categorized expenses */
-export function expenseMonthsCount(transactions: Transaction[]): number {
-  const months = new Set<string>()
-  for (const t of transactions) {
-    if (t.currency !== 'Br' || isUncategorized(t) || t.type !== 'expense' || isOneTimeExpense(t)) continue
-    months.add(t.date.slice(0, 7))
-  }
-  return Math.max(months.size, 1)
-}
-
-export function projectMonthlyByClassification(transactions: Transaction[]): ClassificationProjection[] {
-  const recurring = filterForOverview(transactions, 'recurring')
-  const months = expenseMonthsCount(transactions)
-  return groupByClassification(recurring, 'expense')
-    .map((item) => ({
-      name: item.name,
-      totalInPeriod: item.amount,
-      monthlyAverage: item.amount / months,
-      count: item.count,
-    }))
-    .sort((a, b) => b.monthlyAverage - a.monthlyAverage)
 }

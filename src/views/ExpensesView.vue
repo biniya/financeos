@@ -4,7 +4,6 @@ import type { Transaction } from '@/types/transactions'
 import InvestorSummary from '@/components/expenses/InvestorSummary.vue'
 import InvestorMonthlyChart from '@/components/expenses/InvestorMonthlyChart.vue'
 import ClassificationSpendRow from '@/components/expenses/ClassificationSpendRow.vue'
-import ExpenseProjection from '@/components/expenses/ExpenseProjection.vue'
 import TransactionLedger from '@/components/expenses/TransactionLedger.vue'
 import ImportPanel from '@/components/expenses/ImportPanel.vue'
 import CategorizeInbox from '@/components/expenses/CategorizeInbox.vue'
@@ -12,7 +11,7 @@ import TransactionEditor from '@/components/expenses/TransactionEditor.vue'
 import { useTransactionsStore } from '@/stores/transactions'
 import { ArrowUpTrayIcon, PlusIcon } from '@heroicons/vue/24/outline'
 
-type Tab = 'inbox' | 'overview' | 'projection' | 'all'
+type Tab = 'inbox' | 'overview' | 'all'
 
 const store = useTransactionsStore()
 const tab = ref<Tab>('overview')
@@ -27,7 +26,7 @@ const hasData = computed(() => store.transactions.length > 0)
 watch(
   () => store.inboxCount,
   (count) => {
-    if (count > 0 && (tab.value === 'overview' || tab.value === 'projection')) tab.value = 'inbox'
+    if (count > 0 && tab.value === 'overview') tab.value = 'inbox'
   },
 )
 
@@ -74,7 +73,7 @@ function closeEditor() {
       <div>
         <h1 class="font-display text-2xl font-semibold text-ink">Expenses</h1>
         <p class="mt-1 text-sm text-muted">
-          <template v-if="tab === 'overview' || tab === 'projection'">Financial snapshot for stakeholders.</template>
+          <template v-if="tab === 'overview'">Financial snapshot for stakeholders.</template>
           <template v-else>Import your bank CSV, categorize each row yourself, then see where money went.</template>
         </p>
       </div>
@@ -122,18 +121,10 @@ function closeEditor() {
       <button
         type="button"
         class="flex-1 min-w-[5rem] rounded-lg px-3 py-2 text-sm font-semibold transition"
-        :class="tab === 'projection' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
-        @click="tab = 'projection'"
-      >
-        Projection
-      </button>
-      <button
-        type="button"
-        class="flex-1 min-w-[5rem] rounded-lg px-3 py-2 text-sm font-semibold transition"
         :class="tab === 'all' ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'"
         @click="tab = 'all'"
       >
-        All
+        All transactions
       </button>
     </div>
 
@@ -147,11 +138,6 @@ function closeEditor() {
           <h2 class="mb-3 text-xs font-bold uppercase tracking-wider text-muted">Spend by area</h2>
           <ClassificationSpendRow :items="store.byClassificationRecurring" />
         </div>
-      </template>
-
-      <template v-else-if="tab === 'projection'">
-        <InvestorSummary />
-        <ExpenseProjection />
       </template>
 
       <TransactionLedger

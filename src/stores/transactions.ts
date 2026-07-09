@@ -20,12 +20,10 @@ import { useAuthStore } from '@/stores/auth'
 import { dedupeImport, parseTransactionsCsv } from '@/utils/csvImport'
 import {
   dateRange,
-  expenseMonthsCount,
   filterForOverview,
   groupByCategory,
   groupByClassification,
   groupByMonth,
-  projectMonthlyByClassification,
   sumByType,
   sumOneTimeExpenses,
   uncategorizedTransactions,
@@ -88,11 +86,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const range = computed(() => dateRange(transactions.value))
   const categories = computed(() => uniqueValues(transactions.value, 'category'))
   const classifications = computed(() => uniqueValues(transactions.value, 'classification'))
-  const expenseMonths = computed(() => expenseMonthsCount(transactions.value))
-  const projectionByClassification = computed(() => projectMonthlyByClassification(transactions.value))
-  const projectedMonthlyTotal = computed(() =>
-    projectionByClassification.value.reduce((s, p) => s + p.monthlyAverage, 0),
-  )
 
   function persistLocal() {
     saveLocal(transactions.value)
@@ -336,9 +329,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
     range,
     categories,
     classifications,
-    expenseMonths,
-    projectionByClassification,
-    projectedMonthlyTotal,
     init,
     onUserSignedIn,
     onUserSignedOut,
